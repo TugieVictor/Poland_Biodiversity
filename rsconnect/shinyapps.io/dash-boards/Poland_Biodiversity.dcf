@@ -1,0 +1,14 @@
+name: Poland_Biodiversity
+title: Poland_Biodiversity
+username:
+account: dash-boards
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6964675
+bundleId: 6285578
+url: https://dash-boards.shinyapps.io/Poland_Biodiversity/
+when: 1662738030.94675
+lastSyncTime: 1662738030.94708
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: Script.Rmd

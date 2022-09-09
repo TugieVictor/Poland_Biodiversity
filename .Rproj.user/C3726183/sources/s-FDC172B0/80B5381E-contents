@@ -1,0 +1,16 @@
+ui <- fluidPage(
+  # Input a navbarPage to insert a title to the page
+  titlePanel(
+  navbarPage(title = span( "Poland Biodiversity Dashboard", style = "color: #026352" )
+  )),
+  
+  # Inline css which changes the color the background of the body 
+  tags$style(HTML("
+  body {
+    background-color: #EAEAEA;
+  }")),
+  
+  # Call the module UI
+  module_ui("the_app")
+  
+)

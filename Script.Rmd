@@ -1,0 +1,98 @@
+---
+title: "Source data and manupulation"
+author: "Victor"
+date: '`r Sys.Date()`'
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r Load libraries}
+pacman::p_load(tidyverse, ggplot2, plotly, data.table, sqldf, DBI, RSQLite, vroom, here, lubridate, sf, shinysky, DT)
+```
+
+
+
+```{r}
+untar("biodiversity-data.tar.gz",list=TRUE)  ## check contents of the zip folder
+untar("biodiversity-data.tar.gz", exdir = "data")
+```
+
+
+
+```{r}
+mydb <- dbConnect(SQLite(), here("data", "Biodata.db"))
+```
+
+```{r}
+read_csv_chunked(here("data", "occurence.csv"), 
+                 callback = function(chunk, dummy){
+      dbWriteTable(mydb, "Biodiversity", chunk, append = T)}, 
+      chunk_size = 10000)
+```
+
+
+
+```{r}
+
+con <- dbConnect(RSQLite::SQLite(), "data/Biodata.db")
+
+```
+
+
+```{r}
+dbListTables(con)
+```
+
+
+```{r}
+Poland_data <- dbGetQuery(con, "SELECT * FROM occDF WHERE country = 'Poland'")
+```
+
+
+```{r}
+dbDisconnect(con)
+```
+
+
+
+```{r subset to only relevant data columns for the assignment}
+my_poland_data <- Poland_data[, c(6,11,13,16:18,22,29,37)]
+```
+
+```{r}
+my_poland_data <- my_poland_data %>% mutate_all(na_if,"")
+
+my_poland_data$vernacularName[is.na(my_poland_data$vernacularName)] <- "Not Specified"
+```
+
+
+
+```{r}
+my_poland_data <- my_poland_data %>% 
+  mutate(longitudeDecimal = as.numeric(longitudeDecimal)) %>% 
+  mutate(latitudeDecimal = as.numeric(latitudeDecimal)) %>% 
+  mutate(individualCount = as.numeric(individualCount)) %>% 
+  mutate(scientificName = as.factor(scientificName)) %>% 
+  mutate(vernacularName = as.factor(vernacularName)) %>% 
+  mutate(eventDate = as.Date(eventDate)) %>% 
+  mutate(modified = as.Date(modified))
+```
+
+
+# To overlay our leaflet with Poland polygons, we download a shape 
+```{r}
+unzip("../data/POL_adm.zip", list=TRUE) ## check contents of the zip folder
+
+unzip("../data/POL_adm.zip",exdir = "../data")
+
+```
+
+# Read the shape file into R as an object
+```{r}
+polshape <- st_read("data/POL_adm1.shp")
+
+polshape <- st_transform(polshape, '+proj=longlat +datum=WGS84')
+```
+
+
